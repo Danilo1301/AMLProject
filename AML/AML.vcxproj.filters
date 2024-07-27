@@ -1,0 +1,20 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClInclude Include="pch.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="main.cpp" />
+    <ClCompile Include="mod\config.cpp">
+      <Filter>mod</Filter>
+    </ClCompile>
+    <ClCompile Include="mod\logger.cpp">
+      <Filter>mod</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="mod">
+      <UniqueIdentifier>{e057e5e3-c9b6-45c6-9d83-a412b4470ff5}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>
