@@ -2,6 +2,10 @@
 <Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
   <ItemGroup>
     <ClInclude Include="pch.h" />
+    <ClInclude Include="CleoOpcodes.h" />
+    <ClInclude Include="CleoScript.h" />
+    <ClInclude Include="Log.h" />
+    <ClInclude Include="utils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp" />
@@ -11,6 +15,8 @@
     <ClCompile Include="mod\logger.cpp">
       <Filter>mod</Filter>
     </ClCompile>
+    <ClCompile Include="CleoScript.cpp" />
+    <ClCompile Include="Log.cpp" />
   </ItemGroup>
   <ItemGroup>
     <Filter Include="mod">

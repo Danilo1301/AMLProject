@@ -1,30 +1,81 @@
-#include "pch.h"
+#include <mod/amlmod.h>
+#include <mod/logger.h>
+#include <mod/config.h>
 
-MYMODCFG(net.danilo1301.AMLProject, AML Project, 1.0.0, Danilo1301)
+#include "utils.h"
 
-//MYMOD(net.rusjj.mymod.guid, AML Mod Template Without Config, 1.0, RusJJ)
+#include "Log.h"
+#include "CleoScript.h"
 
-//NEEDGAME(net.rusjj.mygame)
+// ---------------------------------------
 
-//BEGIN_DEPLIST()
-//    ADD_DEPENDENCY_VER(net.rusjj.aml, 1.0)
-//END_DEPLIST()
+MYMODCFG(net.danilo1301.amlProject, AML Project, 1.0.0, Danilo1301)
 
-uintptr_t pGameLibrary = 0;
-ConfigEntry* pCfgMyBestEntry;
+// ---------------------------------------
+
+// CLEO 2.0.1.5
+#include "cleo.h"
+cleo_ifs_t* cleo = NULL;
+
+// Script Commands
+#include "IScriptCommands.h"
+IScriptCommands* scriptCommands = NULL;
+
+// Menu VSL
+#include "menu/IMenuVSL.h"
+IMenuVSL* menuVSL = NULL;
+//#define debug menuVSL->debug
+
+// ---------------------------------------
+
+uintptr_t pGameLib = 0;
+void* pGameHandle = NULL;
+
+//---------------------------------------------------------------------------------------------------
+
+extern "C" void OnModPreLoad()
+{
+    char logPath[512];
+	sprintf(logPath, "%s/amlProject/", aml->GetConfigPath());
+
+    CreateFolder(logPath);
+
+    Log::Open(logPath, "amlProject");
+
+    Log::Level(eLogLevel::LOG_BOTH) << "Preload()" << std::endl;
+    Log::Level(eLogLevel::LOG_BOTH) << "AML headers: 1.0.3.1" << std::endl;
+
+    logger->SetTag("AML Project");
+
+    logger->Info("Preload");
+
+    Log::Level(eLogLevel::LOG_BOTH) << "Preload() END" << std::endl;
+}
 
 extern "C" void OnModLoad()
 {
-    logger->SetTag("AML Project");
+    Log::Level(eLogLevel::LOG_BOTH) << "Load()" << std::endl;
+
+    cfg->Bind("Author", "", "About")->SetString("Danilo1301"); cfg->ClearLast();
+    cfg->Bind("Discord", "", "About")->SetString("https://discord.gg/mkCDRf4zJA"); cfg->ClearLast();
+    cfg->Bind("GitHub", "", "About")->SetString("https://github.com/Danilo1301"); cfg->ClearLast();
+    cfg->Save();
+
+    Log::Level(eLogLevel::LOG_BOTH) << "Loading interfaces..." << std::endl;
+
+    LoadInterface(&cleo, "CLEO");
+    LoadInterface(&scriptCommands, "ScriptCommands");
+    LoadInterface(&menuVSL, "MenuVSL");
+
+    Log::Level(eLogLevel::LOG_BOTH) << "Loading addresses..." << std::endl;
     
-    pCfgMyBestEntry = cfg->Bind("mySetting", "DefaultValue is 0?", "MyUniqueSection");
-    pCfgMyBestEntry->SetString("DefaultValue is unchanged");
-    pCfgMyBestEntry->SetInt(1);
-    pCfgMyBestEntry->Reset();
-    delete pCfgMyBestEntry; // Clean-up memory
-    
-    bool bEnabled = cfg->Bind("Enable", true)->GetBool();
-    delete Config::pLastEntry; // Clean-up of the latest ConfigEntry*
-    
-    cfg->Save(); // Will only save if something was changed
+    pGameHandle = dlopen("libGTASA.so", RTLD_LAZY);
+    uintptr_t gameAddr = (uintptr_t)(cleo->GetMainLibraryLoadAddress());
+
+    Log::Level(eLogLevel::LOG_BOTH) << "Load() END" << std::endl;
+
+    scriptCommands->AddOnFirstUpdateGame(CleoScript::OnFirstUpdate);
+    scriptCommands->AddOnUpdateGame(CleoScript::OnUpdate);
+
+    CleoScript::OnLoad();
 }
